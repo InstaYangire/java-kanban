@@ -40,8 +40,13 @@ public class TaskManager {
     }
 
     // Удаляем задачу по ID
-    public void removeTask(int id) {
+    public void removeTaskById(int id) {
         tasks.remove(id);
+    }
+
+    //Удаляем все задачи
+    public void removeAllTasks() {
+        tasks.clear();
     }
 
     // ____________Работа с Большими Задачами (Epic)______________
@@ -63,9 +68,15 @@ public class TaskManager {
     }
 
     // Обновить эпик (без изменения его подзадач)
+    // копируем список подзадач из старого эпика, чтобы не потерять связь
     public void updateEpic(Epic epic) {
+        Epic oldEpic = epics.get(epic.getId());
+        if (oldEpic != null) {
+            for (int subId : oldEpic.getSubtaskIds()) {
+                epic.addSubtaskId(subId);
+            }
+        }
         epics.put(epic.getId(), epic);
-        // на всякий случай обновлю статус
         updateEpicStatus(epic);
     }
 
@@ -77,6 +88,12 @@ public class TaskManager {
                 subtasks.remove(subId);
             }
         }
+    }
+
+    //Удаляем все эпики (с его подзадачами, само собой)
+    public void removeAllEpics() {
+        epics.clear();
+        subtasks.clear();
     }
 
     // ____________Работа с Подзадачами для эпиков (SubTask)______________
@@ -134,6 +151,15 @@ public class TaskManager {
                 epic.removeSubtaskId(id);
                 updateEpicStatus(epic);
             }
+        }
+    }
+
+    //Удаляем все подзадачи из эпика
+    public void removeAllSubtasks() {
+        subtasks.clear();
+        for (Epic epic : epics.values()) {
+            epic.clearSubtasks();
+            updateEpicStatus(epic);
         }
     }
 

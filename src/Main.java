@@ -61,7 +61,7 @@ public class Main {
         System.out.println("Эпик \"" + epic1.getName() + "\" имеет статус: " + manager.getEpicById(epic1.getId()).getStatus());
 
         // Удалим одну задачу и один эпик
-        manager.removeTask(task2.getId());
+        manager.removeTaskById(task2.getId());
         manager.removeEpic(epic2.getId());
 
         System.out.println("\nПосле удаления одной задачи и одного эпика:");
