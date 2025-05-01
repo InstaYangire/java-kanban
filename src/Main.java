@@ -1,4 +1,4 @@
-import manager.TaskManager;
+import manager.InMemoryTaskManager;
 import model.*;
 
 public class Main {
@@ -6,9 +6,9 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Поехали!");
 
-        // далее все проверки строго по заданию
+        // Проверки строго по заданию
+        InMemoryTaskManager manager = new InMemoryTaskManager();
 
-        TaskManager manager = new TaskManager();
         // Создаем две обычные задачи
         Task task1 = new Task("Купить продукты", "Хлеб, яйца, пельмешки");
         Task task2 = new Task("Сходить в аптеку", "Купить пустырник");
@@ -61,11 +61,21 @@ public class Main {
         System.out.println("Эпик \"" + epic1.getName() + "\" имеет статус: " + manager.getEpicById(epic1.getId()).getStatus());
 
         // Удалим одну задачу и один эпик
-        manager.removeTaskById(task2.getId());
+        manager.removeTask(task2.getId());
         manager.removeEpic(epic2.getId());
 
         System.out.println("\nПосле удаления одной задачи и одного эпика:");
         System.out.println("Оставшиеся задачи: " + manager.getAllTasks().size());
         System.out.println("Оставшиеся эпики: " + manager.getAllEpics().size());
+
+        // Проверка истории просмотров
+        manager.getTaskById(task1.getId());
+        manager.getEpicById(epic1.getId());
+        manager.getSubtaskById(sub1.getId());
+
+        System.out.println("\nИстория просмотров:");
+        for (Task viewed : manager.getHistory()) {
+            System.out.println(viewed.getName() + " (ID: " + viewed.getId() + ")");
+        }
     }
 }
