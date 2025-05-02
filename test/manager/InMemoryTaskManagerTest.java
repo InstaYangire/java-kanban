@@ -141,4 +141,27 @@ class InMemoryTaskManagerTest {
 
         assertNotEquals(task1.getId(), task2.getId());
     }
+
+    // Тест: при обновлении эпика подзадачи не дублируются
+    @Test
+    void updateEpicShouldNotDuplicateSubtaskIds() {
+        Epic epic = new Epic("Мероприятие", "Организация");
+        manager.addEpic(epic);
+
+        Subtask sub1 = new Subtask("Заказать зал", "С залом", epic.getId());
+        Subtask sub2 = new Subtask("Купить напитки", "Сок и вода", epic.getId());
+        manager.addSubtask(sub1);
+        manager.addSubtask(sub2);
+
+        Epic updatedEpic = new Epic("Мероприятие обновлено", "Новое описание");
+        updatedEpic.setId(epic.getId());
+        manager.updateEpic(updatedEpic);
+
+        Epic result = manager.getEpicById(epic.getId());
+        List<Integer> subtaskIds = result.getSubtaskIds();
+
+        assertEquals(2, subtaskIds.size());
+        assertTrue(subtaskIds.contains(sub1.getId()));
+        assertTrue(subtaskIds.contains(sub2.getId()));
+    }
 }
