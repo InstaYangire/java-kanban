@@ -5,36 +5,88 @@ import model.Task;
 import java.util.*;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    private final List<Task> history = new ArrayList<>();
-    private final Map<Integer, Task> historyMap = new HashMap<>();
 
+    // Узел двусвязного списка истории
+    private static class Node {
+        Task task;
+        Node prev;
+        Node next;
+
+        Node(Node prev, Task task, Node next) {
+            this.prev = prev;
+            this.task = task;
+            this.next = next;
+        }
+    }
+
+    // Начало и конец списка просмотров
+    private Node head;
+    private Node tail;
+
+    // Храним соответствие: id задачи - узел в списке
+    private final Map<Integer, Node> nodeMap = new HashMap<>();
+
+    // Добавляем задачу в конец истории
     @Override
     public void add(Task task) {
         // Удаляем предыдущую версию, если такая есть
         remove(task.getId());
 
-        // Добавляем задачу в конец
-        history.add(task);
-        historyMap.put(task.getId(), task);
-
-        // Ограничиваем историю 10 задачами
-        if (history.size() > 10) {
-            Task oldest = history.remove(0);
-            historyMap.remove(oldest.getId());
-        }
+        // Добавляем задачу в конец списка
+        linkLast(task);
     }
 
+    // Удаляем задачу из истории по id
     @Override
     public void remove(int id) {
-        Task toRemove = historyMap.remove(id);
-        if (toRemove != null) {
-            history.remove(toRemove);
+        Node node = nodeMap.remove(id);
+        if (node != null) {
+            removeNode(node);
         }
     }
 
+    // Возвращаем список истории просмотров
     @Override
     public List<Task> getHistory() {
-        return new ArrayList<>(history);
+        return getTasks();
+    }
+
+    // Метод добавляет задачу в конец двусвязного списка
+    private void linkLast(Task task) {
+        Node newNode = new Node(tail, task, null);
+        if (tail != null) {
+            tail.next = newNode;
+        } else {
+            head = newNode; // если список был пуст
+        }
+        tail = newNode;
+        nodeMap.put(task.getId(), newNode);
+    }
+
+    // Удаляем узел из списка
+    private void removeNode(Node node) {
+        if (node.prev != null) {
+            node.prev.next = node.next;
+        } else {
+            head = node.next; // если это был первый элемент
+        }
+
+        if (node.next != null) {
+            node.next.prev = node.prev;
+        } else {
+            tail = node.prev; // если это был последний элемент
+        }
+    }
+
+    // Возвращаем все задачи из истории в виде списка
+    private List<Task> getTasks() {
+        List<Task> result = new ArrayList<>();
+        Node current = head;
+        while (current != null) {
+            result.add(current.task);
+            current = current.next;
+        }
+        return result;
     }
 }
 

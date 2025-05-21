@@ -1,7 +1,8 @@
 package manager;
 
-import model.*;
-import org.junit.jupiter.api.*;
+import model.Task;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
@@ -34,25 +35,7 @@ class InMemoryHistoryManagerTest {
         assertEquals(task, history.get(0));
     }
 
-    // Тест: удаление задачи из истории по ID
-    @Test
-    void shouldRemoveTaskFromHistory() {
-        Task task1 = new Task("Задача 1", "Описание 1");
-        Task task2 = new Task("Задача 2", "Описание 2");
-        task1.setId(1);
-        task2.setId(2);
-
-        historyManager.add(task1);
-        historyManager.add(task2);
-
-        historyManager.remove(1); // удаляем первую задачу по ID
-        List<Task> history = historyManager.getHistory();
-
-        assertEquals(1, history.size());
-        assertEquals(task2, history.get(0));
-    }
-
-    // Тест: не добавляет дубликат, а перемещает в конец
+    // Тест: повторное добавление не создает дубликатов, а перемещает в конец
     @Test
     void shouldNotAddDuplicateTask() {
         Task task = new Task("Повтор", "Описание");
@@ -62,41 +45,57 @@ class InMemoryHistoryManagerTest {
         historyManager.add(task); // повторное добавление
 
         List<Task> history = historyManager.getHistory();
-        assertEquals(1, history.size());
-        assertEquals(task, history.get(0));
+        assertEquals(1, history.size()); // только один элемент
+        assertEquals(task, history.get(0)); // он в конце
     }
 
-    // Тест: история должна содержать не более 10 задач
+    // Тест: добавление нескольких задач, порядок сохраняется
     @Test
-    void historyShouldNotExceedLimit() {
-        for (int i = 1; i <= 15; i++) {
-            Task task = new Task("Задача " + i, "Описание");
-            task.setId(i);
-            historyManager.add(task);
-        }
+    void shouldPreserveViewOrder() {
+        Task t1 = new Task("1", "A"); t1.setId(1);
+        Task t2 = new Task("2", "B"); t2.setId(2);
+        Task t3 = new Task("3", "C"); t3.setId(3);
+
+        historyManager.add(t1);
+        historyManager.add(t2);
+        historyManager.add(t3);
 
         List<Task> history = historyManager.getHistory();
-        assertEquals(10, history.size());
-        assertEquals(6, history.get(0).getId());
-        assertEquals(15, history.get(9).getId());
+        assertEquals(List.of(t1, t2, t3), history);
     }
 
-    // Тест: удаление из начала, середины и конца истории
+    // Тест: удаление задачи по ID
     @Test
-    void shouldRemoveFromBeginningMiddleEnd() {
-        for (int i = 1; i <= 5; i++) {
-            Task task = new Task("Задача " + i, "Описание");
-            task.setId(i);
-            historyManager.add(task);
-        }
+    void shouldRemoveTaskFromHistory() {
+        Task t1 = new Task("1", "A"); t1.setId(1);
+        Task t2 = new Task("2", "B"); t2.setId(2);
+        Task t3 = new Task("3", "C"); t3.setId(3);
+
+        historyManager.add(t1);
+        historyManager.add(t2);
+        historyManager.add(t3);
+
+        historyManager.remove(2); // удалим из середины
+
+        List<Task> history = historyManager.getHistory();
+        assertEquals(List.of(t1, t3), history);
+    }
+
+    // Тест: удаление первой и последней задач
+    @Test
+    void shouldRemoveFromBeginningAndEnd() {
+        Task t1 = new Task("1", "A"); t1.setId(1);
+        Task t2 = new Task("2", "B"); t2.setId(2);
+        Task t3 = new Task("3", "C"); t3.setId(3);
+
+        historyManager.add(t1);
+        historyManager.add(t2);
+        historyManager.add(t3);
 
         historyManager.remove(1); // начало
-        historyManager.remove(3); // середина
-        historyManager.remove(5); // конец
+        historyManager.remove(3); // конец
 
         List<Task> history = historyManager.getHistory();
-        assertEquals(2, history.size());
-        assertEquals(2, history.get(0).getId());
-        assertEquals(4, history.get(1).getId());
+        assertEquals(List.of(t2), history);
     }
 }

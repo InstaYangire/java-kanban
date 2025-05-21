@@ -164,4 +164,61 @@ class InMemoryTaskManagerTest {
         assertTrue(subtaskIds.contains(sub1.getId()));
         assertTrue(subtaskIds.contains(sub2.getId()));
     }
+
+    // Тест: удалённая задача пропадает из истории
+    @Test
+    void removedTaskShouldBeRemovedFromHistory() {
+        Task task = new Task("Удаляемая", "Описание");
+        manager.addTask(task);
+        manager.getTaskById(task.getId());
+
+        manager.removeTask(task.getId());
+
+        List<Task> history = manager.getHistory();
+        assertFalse(history.contains(task));
+    }
+
+    // Тест: удаление эпика удаляет его и подзадачи из истории
+    @Test
+    void removingEpicShouldAlsoClearItsSubtasksFromHistory() {
+        Epic epic = new Epic("Эпик", "С подзадачами");
+        manager.addEpic(epic);
+
+        Subtask s1 = new Subtask("Подзадача 1", "Описание", epic.getId());
+        Subtask s2 = new Subtask("Подзадача 2", "Описание", epic.getId());
+        manager.addSubtask(s1);
+        manager.addSubtask(s2);
+
+        manager.getEpicById(epic.getId());
+        manager.getSubtaskById(s1.getId());
+        manager.getSubtaskById(s2.getId());
+
+        manager.removeEpic(epic.getId());
+
+        List<Task> history = manager.getHistory();
+        assertTrue(history.isEmpty());
+    }
+
+    // Тест: подзадачи не дублируются при updateEpic
+    @Test
+    void subtaskLinksShouldBePreservedAfterEpicUpdate() {
+        Epic epic = new Epic("Старый эпик", "Описание");
+        manager.addEpic(epic);
+
+        Subtask s1 = new Subtask("Одна", "Описание", epic.getId());
+        Subtask s2 = new Subtask("Другая", "Описание", epic.getId());
+        manager.addSubtask(s1);
+        manager.addSubtask(s2);
+
+        Epic updated = new Epic("Обновлён", "Новое описание");
+        updated.setId(epic.getId());
+        manager.updateEpic(updated);
+
+        Epic fromManager = manager.getEpicById(epic.getId());
+        List<Integer> subtaskIds = fromManager.getSubtaskIds();
+
+        assertEquals(2, subtaskIds.size());
+        assertTrue(subtaskIds.contains(s1.getId()));
+        assertTrue(subtaskIds.contains(s2.getId()));
+    }
 }
