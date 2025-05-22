@@ -77,5 +77,64 @@ public class Main {
         for (Task viewed : manager.getHistory()) {
             System.out.println(viewed.getName() + " (ID: " + viewed.getId() + ")");
         }
+
+        System.out.println("\n===== ДОПОЛНИТЕЛЬНЫЙ СЦЕНАРИЙ =====");
+
+        // Создаём две задачи
+        Task t1 = new Task("Задача A", "Описание A");
+        Task t2 = new Task("Задача B", "Описание B");
+        manager.addTask(t1);
+        manager.addTask(t2);
+
+        // Создаём эпик с тремя подзадачами
+        Epic epicWithSubs = new Epic("Эпик с подзадачами", "Сценарий");
+        manager.addEpic(epicWithSubs);
+
+        Subtask s1 = new Subtask("Подзадача 1", "...", epicWithSubs.getId());
+        Subtask s2 = new Subtask("Подзадача 2", "...", epicWithSubs.getId());
+        Subtask s3 = new Subtask("Подзадача 3", "...", epicWithSubs.getId());
+        manager.addSubtask(s1);
+        manager.addSubtask(s2);
+        manager.addSubtask(s3);
+
+        // Создаём эпик без подзадач
+        Epic epicEmpty = new Epic("Эпик без подзадач", "Тест");
+        manager.addEpic(epicEmpty);
+
+        // Просматриваем задачи и подзадачи в разном порядке
+        manager.getTaskById(t1.getId());
+        manager.getEpicById(epicEmpty.getId());
+        manager.getSubtaskById(s2.getId());
+        manager.getEpicById(epicWithSubs.getId());
+        manager.getTaskById(t2.getId());
+        manager.getSubtaskById(s1.getId());
+        manager.getSubtaskById(s3.getId());
+
+        // Выводим историю
+        System.out.println("\nИстория после просмотров:");
+        for (Task task : manager.getHistory()) {
+            System.out.println(task.getName() + " (ID: " + task.getId() + ")");
+        }
+
+        // Повторный просмотр одной задачи — должна переместиться в конец
+        manager.getTaskById(t1.getId());
+        System.out.println("\nИстория после повторного просмотра t1:");
+        for (Task task : manager.getHistory()) {
+            System.out.println(task.getName() + " (ID: " + task.getId() + ")");
+        }
+
+        // Удаляем задачу t2
+        manager.removeTask(t2.getId());
+        System.out.println("\nИстория после удаления t2:");
+        for (Task task : manager.getHistory()) {
+            System.out.println(task.getName() + " (ID: " + task.getId() + ")");
+        }
+
+        // Удаляем эпик с подзадачами
+        manager.removeEpic(epicWithSubs.getId());
+        System.out.println("\nИстория после удаления эпика с подзадачами:");
+        for (Task task : manager.getHistory()) {
+            System.out.println(task.getName() + " (ID: " + task.getId() + ")");
+        }
     }
 }
