@@ -29,11 +29,12 @@ public class InMemoryHistoryManager implements HistoryManager {
     // Добавляем задачу в конец истории
     @Override
     public void add(Task task) {
-        // Удаляем предыдущую версию, если такая есть
+        if (task == null) {
+            return;
+        }
         remove(task.getId());
-
-        // Добавляем задачу в конец списка
         linkLast(task);
+        nodeMap.put(task.getId(), tail);
     }
 
     // Удаляем задачу из истории по id
@@ -65,17 +66,23 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     // Удаляем узел из списка
     private void removeNode(Node node) {
+        if (node == null) return;
+
         if (node.prev != null) {
             node.prev.next = node.next;
         } else {
-            head = node.next; // если это был первый элемент
+            head = node.next;
         }
 
         if (node.next != null) {
             node.next.prev = node.prev;
         } else {
-            tail = node.prev; // если это был последний элемент
+            tail = node.prev;
         }
+
+        // Удаляем все ссылки из узла, чтобы не мешал сборщику мусора
+        node.prev = null;
+        node.next = null;
     }
 
     // Возвращаем все задачи из истории в виде списка
