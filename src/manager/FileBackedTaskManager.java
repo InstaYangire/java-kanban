@@ -11,7 +11,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public FileBackedTaskManager(File file) {
         super();
         this.file = file;
-        this.historyManager = new InMemoryHistoryManager();
     }
 
     // Метод сохраняет все задачи, эпики и подзадачи в файл в формате CSV.
