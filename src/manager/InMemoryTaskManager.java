@@ -8,13 +8,18 @@ import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
     // вот тут будем хранить задачи всех типов + история
-    private final HashMap<Integer, Task> tasks = new HashMap<>();
-    private final HashMap<Integer, Epic> epics = new HashMap<>();
-    private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
-    private final HistoryManager historyManager = new InMemoryHistoryManager();
+    protected final HashMap<Integer, Task> tasks = new HashMap<>();
+    protected final HashMap<Integer, Epic> epics = new HashMap<>();
+    protected final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    protected HistoryManager historyManager;  // изменено с final на protected
 
     // Счётчик Id для всех новых задач
-    private int nextId = 1;
+    protected int nextId = 1;
+
+    // Конструктор с инициализацией historyManager
+    public InMemoryTaskManager() {
+        this.historyManager = new InMemoryHistoryManager();
+    }
 
     // Генерируем уникальный ID
     private int generateId() {
@@ -221,7 +226,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     // ____________История просмотров______________
 
-    // Возвращает список последних 10 просмотренных задач
+    // Возвращает список последних просмотренных задач
     @Override
     public List<Task> getHistory() {
         return historyManager.getHistory();
