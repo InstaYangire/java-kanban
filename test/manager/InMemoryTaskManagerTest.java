@@ -3,6 +3,8 @@ package manager;
 import model.*;
 import org.junit.jupiter.api.*;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -220,5 +222,63 @@ class InMemoryTaskManagerTest {
         assertEquals(2, subtaskIds.size());
         assertTrue(subtaskIds.contains(s1.getId()));
         assertTrue(subtaskIds.contains(s2.getId()));
+    }
+
+    // Тест: у задачи корректно работают поля времени и длительности
+    @Test
+    void taskTimeFieldsShouldWorkCorrectly() {
+        Task task = new Task("Задача с временем", "Проверка времени");
+        LocalDateTime start = LocalDateTime.of(2025, 6, 5, 10, 0);
+        task.setStartTime(start);
+        task.setDuration(Duration.ofMinutes(30));
+
+        assertEquals(start, task.getStartTime());
+        assertEquals(Duration.ofMinutes(30), task.getDuration());
+        assertEquals(start.plusMinutes(30), task.getEndTime());
+    }
+
+    // Тест: у эпика правильно вычисляются время старта, окончания и суммарная длительность из подзадач
+    @Test
+    void epicTimeShouldBeCalculatedFromSubtasks() {
+        Epic epic = new Epic("Эпик", "Тестовое время");
+        manager.addEpic(epic);
+
+        Subtask s1 = new Subtask("Подзадача 1", "Первая", epic.getId());
+        s1.setStartTime(LocalDateTime.of(2025, 6, 5, 9, 0));
+        s1.setDuration(Duration.ofMinutes(60));
+        manager.addSubtask(s1);
+
+        Subtask s2 = new Subtask("Подзадача 2", "Вторая", epic.getId());
+        s2.setStartTime(LocalDateTime.of(2025, 6, 5, 11, 0));
+        s2.setDuration(Duration.ofMinutes(30));
+        manager.addSubtask(s2);
+
+        Epic resultEpic = manager.getEpicById(epic.getId());
+
+        assertEquals(LocalDateTime.of(2025, 6, 5, 9, 0), resultEpic.getStartTime());
+        assertEquals(Duration.ofMinutes(90), resultEpic.getDuration());
+        assertEquals(LocalDateTime.of(2025, 6, 5, 11, 30), resultEpic.getEndTime());
+    }
+
+    // Тест: getPrioritizedTasks возвращает задачи и подзадачи, отсортированные по времени старта
+    @Test
+    void getPrioritizedTasksShouldReturnTasksSortedByStartTime() {
+        Task task1 = new Task("Таска1", "Описание");
+        task1.setStartTime(LocalDateTime.of(2025, 6, 5, 8, 0));
+        manager.addTask(task1);
+
+        Task task2 = new Task("Таска2", "Описание");
+        // Без времени старта — не попадёт в результат
+        manager.addTask(task2);
+
+        Subtask subtask1 = new Subtask("Подзадача1", "Описание", 0);
+        subtask1.setStartTime(LocalDateTime.of(2025, 6, 5, 7, 0));
+        manager.addSubtask(subtask1);
+
+        List<Task> prioritized = manager.getPrioritizedTasks();
+
+        assertEquals(2, prioritized.size()); // только задачи с временем старта
+        assertEquals(subtask1.getId(), prioritized.get(0).getId());
+        assertEquals(task1.getId(), prioritized.get(1).getId());
     }
 }

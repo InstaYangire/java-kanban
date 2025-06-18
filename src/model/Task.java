@@ -1,11 +1,16 @@
 package model;
 import java.util.Objects;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class Task {
     protected String name;
     protected String description;
     protected int id;
     protected TaskStatus status;
+    // Новые поля для продолжительности и времени старта
+    protected Duration duration = Duration.ofMinutes(0); // по умолчанию 0 минут
+    protected LocalDateTime startTime = null; // время начала может быть не задано
 
     public Task(String name, String description) {
         this.name = name;
@@ -48,5 +53,31 @@ public class Task {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    // Геттер и сеттер для duration
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    // Геттер и сеттер для startTime
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    // Метод для получения времени окончания задачи
+    public LocalDateTime getEndTime() {
+        if (startTime == null) {
+            return null; // если время старта не задано, окончания тоже нет
+        }
+        return startTime.plus(duration);
     }
 }
