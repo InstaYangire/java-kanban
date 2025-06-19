@@ -281,4 +281,38 @@ class InMemoryTaskManagerTest {
         assertEquals(subtask1.getId(), prioritized.get(0).getId());
         assertEquals(task1.getId(), prioritized.get(1).getId());
     }
+
+    // Тест: при добавлении пересекающейся задачи выбрасывается исключение
+    @Test
+    void addTaskShouldThrowExceptionIfTimeOverlap() {
+        Task task1 = new Task("Таска1", "Описание1");
+        task1.setStartTime(LocalDateTime.of(2025, 6, 5, 10, 0));
+        task1.setDuration(Duration.ofMinutes(60));
+        manager.addTask(task1);
+
+        Task overlappingTask = new Task("Таска2", "Описание2");
+        // Пересекается с task1
+        overlappingTask.setStartTime(LocalDateTime.of(2025, 6, 5, 10, 30));
+        overlappingTask.setDuration(Duration.ofMinutes(30));
+
+        assertThrows(ManagerSaveException.class, () -> manager.addTask(overlappingTask));
+    }
+
+    // Тест: при обновлении задачи на пересекающееся время выбрасывается исключение
+    @Test
+    void updateTaskShouldThrowExceptionIfTimeOverlap() {
+        Task task1 = new Task("Таска1", "Описание1");
+        task1.setStartTime(LocalDateTime.of(2025, 6, 5, 10, 0));
+        task1.setDuration(Duration.ofMinutes(60));
+        manager.addTask(task1);
+
+        Task task2 = new Task("Таска2", "Описание2");
+        task2.setStartTime(LocalDateTime.of(2025, 6, 5, 11, 0));
+        task2.setDuration(Duration.ofMinutes(60));
+        manager.addTask(task2);
+        // Пересекается с task1
+        task2.setStartTime(LocalDateTime.of(2025, 6, 5, 10, 30));
+
+        assertThrows(ManagerSaveException.class, () -> manager.updateTask(task2));
+    }
 }
