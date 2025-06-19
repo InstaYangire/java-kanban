@@ -282,7 +282,7 @@ class InMemoryTaskManagerTest {
         assertEquals(task1.getId(), prioritized.get(1).getId());
     }
 
-    // Тест: при добавлении пересекающейся задачи выбрасывается исключение
+    // Тест: при добавлении пересекающейся задачи выбрасывается IllegalArgumentException
     @Test
     void addTaskShouldThrowExceptionIfTimeOverlap() {
         Task task1 = new Task("Таска1", "Описание1");
@@ -291,14 +291,13 @@ class InMemoryTaskManagerTest {
         manager.addTask(task1);
 
         Task overlappingTask = new Task("Таска2", "Описание2");
-        // Пересекается с task1
-        overlappingTask.setStartTime(LocalDateTime.of(2025, 6, 5, 10, 30));
+        overlappingTask.setStartTime(LocalDateTime.of(2025, 6, 5, 10, 30)); // Пересекается с task1
         overlappingTask.setDuration(Duration.ofMinutes(30));
 
-        assertThrows(ManagerSaveException.class, () -> manager.addTask(overlappingTask));
+        assertThrows(IllegalArgumentException.class, () -> manager.addTask(overlappingTask));
     }
 
-    // Тест: при обновлении задачи на пересекающееся время выбрасывается исключение
+    // Тест: при обновлении задачи на пересекающееся время выбрасывается IllegalArgumentException
     @Test
     void updateTaskShouldThrowExceptionIfTimeOverlap() {
         Task task1 = new Task("Таска1", "Описание1");
@@ -307,12 +306,13 @@ class InMemoryTaskManagerTest {
         manager.addTask(task1);
 
         Task task2 = new Task("Таска2", "Описание2");
-        task2.setStartTime(LocalDateTime.of(2025, 6, 5, 11, 0));
+        // пока НЕ пересекается — 12:00
+        task2.setStartTime(LocalDateTime.of(2025, 6, 5, 12, 0));
         task2.setDuration(Duration.ofMinutes(60));
         manager.addTask(task2);
-        // Пересекается с task1
+
         task2.setStartTime(LocalDateTime.of(2025, 6, 5, 10, 30));
 
-        assertThrows(ManagerSaveException.class, () -> manager.updateTask(task2));
+        assertThrows(IllegalArgumentException.class, () -> manager.updateTask(task2));
     }
 }
