@@ -89,6 +89,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
 
             manager.nextId = maxId + 1;
+
+            // Обновляем время и длительность у всех эпиков после загрузки
+            for (Epic epic : manager.epics.values()) {
+                manager.updateEpicTimeAndDuration(epic);
+            }
+
         } catch (Exception e) {
             throw new ManagerSaveException("Ошибка при загрузке из файла", e);
         }
