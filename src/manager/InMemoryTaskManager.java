@@ -63,6 +63,10 @@ public class InMemoryTaskManager implements TaskManager {
         if (isIntersectingWithOtherTasks(task)) {
             throw new IllegalArgumentException("Задачи пересекаются по времени");
         }
+        Task taskToUpdate = getTaskById(task.getId());
+        if (taskToUpdate == null) {
+            throw new IllegalArgumentException("Обновление существующего таска");
+        }
         tasks.put(task.getId(), task);
     }
 
@@ -130,10 +134,12 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeEpic(int id) {
         Epic epic = epics.remove(id);
         if (epic != null) {
-            for (int subId : epic.getSubtaskIds()) {
-                subtasks.remove(subId);
-                // Удаляем подзадачи эпика из истории
-                historyManager.remove(subId);
+            if (epic.getSubtaskIds() != null) {
+                for (int subId : epic.getSubtaskIds()) {
+                    subtasks.remove(subId);
+                    // Удаляем подзадачи эпика из истории
+                    historyManager.remove(subId);
+                }
             }
             // Удаляем сам эпик из истории
             historyManager.remove(id);
@@ -247,6 +253,10 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateSubtask(Subtask subtask) {
         if (isIntersectingWithOtherTasks(subtask)) {
             throw new IllegalArgumentException("Задачи пересекаются по времени");
+        }
+        Subtask subtaskToUpdate = getSubtaskById(subtask.getId());
+        if (subtaskToUpdate == null) {
+            throw new IllegalArgumentException("Обновление существующего сабтаска");
         }
         subtasks.put(subtask.getId(), subtask);
         Epic epic = epics.get(subtask.getEpicId());

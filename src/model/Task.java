@@ -78,6 +78,9 @@ public class Task {
         if (startTime == null) {
             return null; // если время старта не задано, окончания тоже нет
         }
-        return startTime.plus(duration);
+        if (duration != null) {
+            return startTime.plus(duration);
+        }
+        return startTime;
     }
 }
