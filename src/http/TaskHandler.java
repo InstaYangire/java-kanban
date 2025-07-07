@@ -142,6 +142,7 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
             exchange.getResponseBody().close();
 
         } catch (Exception e) {
+            e.printStackTrace(); // Логируем ошибку
             exchange.sendResponseHeaders(500, 0); // Внутренняя ошибка сервера
             exchange.getResponseBody().close();
         }

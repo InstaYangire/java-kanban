@@ -88,12 +88,6 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
 
                 try {
                     Epic epic = gson.fromJson(body, Epic.class);
-                    //
-
-                    // Если статус не указан — проставляем NEW
-                    if (epic.getStatus() == null) {
-                        epic.setStatus(TaskStatus.NEW);
-                    }
 
                     // Проверка наличия обязательных полей
                     if (epic.getName() == null || epic.getDescription() == null) {
@@ -131,6 +125,7 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
             exchange.getResponseBody().close();
 
         } catch (Exception e) {
+            e.printStackTrace(); // Логируем ошибку
             exchange.sendResponseHeaders(500, 0); // Внутренняя ошибка сервера
             exchange.getResponseBody().close();
         }

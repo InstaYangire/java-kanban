@@ -99,8 +99,9 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
                         subtask.setStatus(TaskStatus.NEW);
                     }
 
-                    // Проверяем наличие обязательных полей
-                    if (subtask.getName() == null || subtask.getDescription() == null) {
+                    // Проверяем наличие обязательных полей (имя и описание не null и не пустые/пробельные)
+                    if (subtask.getName() == null || subtask.getName().isBlank()
+                            || subtask.getDescription() == null || subtask.getDescription().isBlank()) {
                         sendHasInteractions(exchange);
                         return;
                     }
@@ -148,6 +149,7 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
             exchange.getResponseBody().close();
 
         } catch (Exception e) {
+            e.printStackTrace(); // Логируем ошибку
             exchange.sendResponseHeaders(500, 0); // Внутренняя ошибка сервера
             exchange.getResponseBody().close();
         }
