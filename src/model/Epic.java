@@ -7,7 +7,7 @@ import java.util.List;
 
 public class Epic extends Task {
     // Список ID подзадач, связанных с эпиком
-    private final ArrayList<Integer> subtaskIds;
+    private ArrayList<Integer> subtaskIds;
 
     // Время окончания эпика (максимальное время окончания среди подзадач)
     private LocalDateTime endTime;
@@ -28,17 +28,24 @@ public class Epic extends Task {
 
     // Добавляет ID подзадачи в список
     public void addSubtaskId(int id) {
+        if (subtaskIds == null) {
+            this.subtaskIds = new ArrayList<>();
+        }
         subtaskIds.add(id);
     }
 
     // Удаляет ID подзадачи из списка
     public void removeSubtaskId(int id) {
-        subtaskIds.remove((Integer) id);
+        if (subtaskIds != null) {
+            subtaskIds.remove((Integer) id);
+        }
     }
 
     // Очищает список подзадач (например, при удалении всех подзадач)
     public void clearSubtasks() {
-        subtaskIds.clear();
+        if (subtaskIds != null) {
+            subtaskIds.clear();
+        }
     }
 
     // Геттер для времени окончания эпика
